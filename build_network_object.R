@@ -13,6 +13,7 @@ scls_flow_edges <-
     from_library %in% c('CIA', 'COL', 'LDI', 'PAR', 'POR', 'POY', 'RAN', 'RIO', 'WID', 'WYO') ~ 'Columbia',
     from_library %in% c('BLV', 'BER', 'CBR', 'CSP', 'DCL', 'MRS', 'DEE', 'DFT', 'FCH', 'MAR', 'MAZ', 'MCF', 'MID', 'MOO', 'MTH', 'ORE', 'STO', 'SUN', 'VER', 'WAU') ~ 'Dane',
     from_library %in% c('MAD', 'HPB', 'HAW', 'LAK', 'MEA', 'MSB', 'PIN', 'SEQ', 'SMB') ~ 'Madison PL',
+    from_library %in% c('MCM', 'STP') ~ "thingo",
     TRUE ~ 'other'
     
   )
@@ -23,7 +24,11 @@ scls_flow_edges_avg20 <- scls_flow_edges[scls_flow_edges$daily_average>=20.0, ]
 
 circos.par(gap.degree = 2)
 
-county_grouping <- structure(scls_flow_edges_avg20$county, names=scls_flow_edges_avg20$from_library)
+county_grouping <- 
+  structure(
+    scls_flow_edges_avg20$county, 
+    names = scls_flow_edges_avg20$from_library
+    )
 
 chordDiagram(
   scls_flow_edges_avg20[ ,c(1,2,4)], 
@@ -32,6 +37,43 @@ chordDiagram(
   link.arr.type = "big.arrow",
   group = county_grouping
   )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+############################################################################
+
 
 
 library(statnet)
