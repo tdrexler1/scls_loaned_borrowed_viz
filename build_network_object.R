@@ -1,14 +1,37 @@
-
-
-scl_net.edge <- read.csv("loaned_borrowed_data.csv")
-
-scl_net.edge <- scl_net.edge[scl_net.edge$from_library != scl_net.edge$to_library, ]
-
 library(circlize)
+library(dplyr)
 
-chordDiagram(scl_net.edge[ ,c(1,2,4)], directional = T)
-scl_net.edge_02 <- scl_net.edge[scl_net.edge$daily_average>=20.0, ]
-chordDiagram(scl_net.edge_02[ ,c(1,2,4)], directional = T)
+scls_flow_edges <- read.csv("loaned_borrowed_data.csv")
+
+scls_flow_edges <- 
+  scls_flow_edges[scls_flow_edges$from_library != scls_flow_edges$to_library, ]
+
+scls_flow_edges <- 
+  scls_flow_edges %>% 
+  mutate(county = case_when(
+    from_library %in% c('ACL', 'ROM') ~ 'Adams',
+    from_library %in% c('CIA', 'COL', 'LDI', 'PAR', 'POR', 'POY', 'RAN', 'RIO', 'WID', 'WYO') ~ 'Columbia',
+    from_library %in% c('BLV', 'BER', 'CBR', 'CSP', 'DCL', 'MRS', 'DEE', 'DFT', 'FCH', 'MAR', 'MAZ', 'MCF', 'MID', 'MOO', 'MTH', 'ORE', 'STO', 'SUN', 'VER', 'WAU') ~ 'Dane',
+    from_library %in% c('MAD', 'HPB', 'HAW', 'LAK', 'MEA', 'MSB', 'PIN', 'SEQ', 'SMB') ~ 'Madison PL',
+    TRUE ~ 'other'
+    
+  )
+    
+  )
+
+scls_flow_edges_avg20 <- scls_flow_edges[scls_flow_edges$daily_average>=20.0, ]
+
+circos.par(gap.degree = 2)
+
+county_grouping <- structure(scls_flow_edges_avg20$county, names=scls_flow_edges_avg20$from_library)
+
+chordDiagram(
+  scls_flow_edges_avg20[ ,c(1,2,4)], 
+  directional = T, 
+  direction.type = c("diffHeight", "arrows"),
+  link.arr.type = "big.arrow",
+  group = county_grouping
+  )
 
 
 library(statnet)
