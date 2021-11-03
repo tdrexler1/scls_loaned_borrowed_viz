@@ -60,7 +60,11 @@ scls_flow_edges_avg20 <- scls_flow_edges[scls_flow_edges$daily_average>=20.0, ]
 #   group = county_grouping
 #   )
 
-circos.par(track.margin = c(0.01, 0.01) )
+par(bg='gray')
+
+circos.par(
+  track.margin = c(0.01, 0.01)
+  )
 
 sector_colors = c(
   WAU = "#4E79A7", 
@@ -81,7 +85,7 @@ chordDiagram(
   annotationTrackHeight = 0.05,
   #preAllocateTracks = list(track.height = max( strwidth( sector_codes_df$sector_codes) ) ), 
   #preAllocateTracks = 1,
-  preAllocateTracks = list(list(track.height = mm_h(4) ), list(track.height = mm_h(10)) ),
+  preAllocateTracks = list(list(track.height = mm_h(5) ), list(track.height = mm_h(10)) ),
   directional = T, 
   direction.type = c("diffHeight", "arrows"),
   link.arr.type = "big.arrow",
@@ -99,7 +103,8 @@ circos.track(track.index = 2, panel.fun = function(x, y) {
     CELL_META$ylim[1], 
     CELL_META$sector.index, 
     facing = 'clockwise', 
-    niceFacing = T, adj = c(0, 0.5)
+    niceFacing = T, adj = c(0, 0.5),
+    #family = 'Helvetica'
     )
   }, bg.border = NA
   )
@@ -113,6 +118,27 @@ highlight.sector(
   facing = 'bending.outside',
   niceFacing = T
 )
+
+highlight.sector(
+  c('HAW', 'HPB', 'LAK', 'MAD', 'MEA', 'MSB', 'PIN', 'SEQ', 'SMB'),
+  track.index = 1,
+  col = "#005A9C",
+  text = 'MADISON PL',
+  text.col = '#CCCCCC',
+  facing = 'bending.inside',
+  niceFacing = T
+)
+
+highlight.sector(
+  c('STP', 'MCM'),
+  track.index = 1,
+  col = "#b3b7b8",
+  text = 'OTHER',
+  text.col = '#000000',
+  facing = 'bending.inside',
+  niceFacing = T
+)
+
 
 circos.info()
 circos.clear()
@@ -141,8 +167,19 @@ for(si in get.all.sector.index()){
 
 
 ############################################################################
+# install.packages("extrafont")
+library(extrafont)
 
+# Auto detect the available fonts in your computer
+# This can take several minutes to run
+font_import()
 
+# Font family names
+fonts()
+
+# Data frame containing the font family names
+fonttable()
+############################################################################
 
 library(statnet)
 scl_net <- network(scl_net.edge, matrix.type = "edgelist", loops = T)
