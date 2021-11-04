@@ -6,20 +6,6 @@ scls_flow_edges <- read.csv("loaned_borrowed_data.csv")
 scls_flow_edges <- 
   scls_flow_edges[scls_flow_edges$from_library != scls_flow_edges$to_library, ]
 
-# scls_flow_edges <- 
-#   scls_flow_edges %>% 
-#   mutate(county = case_when(
-#     from_library %in% c('ACL', 'ROM') ~ 'Adams',
-#     from_library %in% c('CIA', 'COL', 'LDI', 'PAR', 'POR', 'POY', 'RAN', 'RIO', 'WID', 'WYO') ~ 'Columbia',
-#     from_library %in% c('BLV', 'BER', 'CBR', 'CSP', 'DCL', 'MRS', 'DEE', 'DFT', 'FCH', 'MAR', 'MAZ', 'MCF', 'MID', 'MOO', 'MTH', 'ORE', 'STO', 'SUN', 'VER', 'WAU') ~ 'Dane',
-#     from_library %in% c('MAD', 'HPB', 'HAW', 'LAK', 'MEA', 'MSB', 'PIN', 'SEQ', 'SMB') ~ 'Madison PL',
-#     from_library %in% c('MCM', 'STP') ~ "thingo",
-#     TRUE ~ 'other'
-#     
-#   )
-#     
-#   )
-
 
 sector_codes <- unique( c(scls_flow_edges$from_library, scls_flow_edges$to_library ) )
 
@@ -45,38 +31,42 @@ county_grouping <-
     names = sector_codes_df$sector_codes
     )
 
-
 scls_flow_edges_avg20 <- scls_flow_edges[scls_flow_edges$daily_average>=20.0, ]
 
 
 
-# chordDiagram(
-#   scls_flow_edges_avg20[ ,c(1,2,4)], 
-#   directional = T, 
-#   direction.type = c("diffHeight", "arrows"),
-#   link.arr.type = "big.arrow",
-#   link.sort = TRUE,
-#   link.decreasing = TRUE,
-#   group = county_grouping
-#   )
 
-par(bg='gray')
+par(bg='gray85')
 
 circos.par(
   track.margin = c(0.01, 0.01)
   )
 
 sector_colors = c(
-  WAU = "#4E79A7", 
-  VER = "#F28E28", 
-  SUN = "#59A14F", 
-  STO = "#B6992D", 
-  ORE = "#499894", 
-  MTH = "#E15759", 
-  MOO = "#79706E", 
-  MID = "#D37295", 
-  MCF = "#B07AA1", 
-  FCH = "#9D7660")
+  WAU = "#8175AA", 
+  VER = "#638B66", 
+  SUN = "#E07972", 
+  STO = "#DB9E68", 
+  ORE = "#4F6980", 
+  MTH = "#BB3E03", 
+  MOO = "#7A306C", 
+  MID = "#659E2A", 
+  MCF = "#9E2A2B", 
+  FCH = "#E09F3E",
+  DFT = "#0F4C81",
+  HAW = "#F47942",
+  HPB = "#849DB1",
+  LAK = "#BFBB60",
+  MAD = "#C23D49",
+  MEA = "#005500",
+  MSB = "#3F1CC3",
+  PIN = "#F45909",
+  SEQ = "#030A8C",
+  SMB = "#FCC30B",
+  STP = "#DC3080",
+  MCM = "#743023")
+
+circos.clear()
 
 chordDiagram(
   scls_flow_edges_avg20[ , c(1,2,4)],
@@ -179,6 +169,33 @@ fonts()
 
 # Data frame containing the font family names
 fonttable()
+############################################################################
+
+# scls_flow_edges <- 
+#   scls_flow_edges %>% 
+#   mutate(county = case_when(
+#     from_library %in% c('ACL', 'ROM') ~ 'Adams',
+#     from_library %in% c('CIA', 'COL', 'LDI', 'PAR', 'POR', 'POY', 'RAN', 'RIO', 'WID', 'WYO') ~ 'Columbia',
+#     from_library %in% c('BLV', 'BER', 'CBR', 'CSP', 'DCL', 'MRS', 'DEE', 'DFT', 'FCH', 'MAR', 'MAZ', 'MCF', 'MID', 'MOO', 'MTH', 'ORE', 'STO', 'SUN', 'VER', 'WAU') ~ 'Dane',
+#     from_library %in% c('MAD', 'HPB', 'HAW', 'LAK', 'MEA', 'MSB', 'PIN', 'SEQ', 'SMB') ~ 'Madison PL',
+#     from_library %in% c('MCM', 'STP') ~ "thingo",
+#     TRUE ~ 'other'
+#     
+#   )
+#     
+#   )
+
+
+# chordDiagram(
+#   scls_flow_edges_avg20[ ,c(1,2,4)], 
+#   directional = T, 
+#   direction.type = c("diffHeight", "arrows"),
+#   link.arr.type = "big.arrow",
+#   link.sort = TRUE,
+#   link.decreasing = TRUE,
+#   group = county_grouping
+#   )
+
 ############################################################################
 
 library(statnet)
