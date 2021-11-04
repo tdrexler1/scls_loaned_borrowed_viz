@@ -1,41 +1,58 @@
 library(circlize)
 library(dplyr)
 
+###
 scls_flow_edges <- read.csv("loaned_borrowed_data.csv")
 
 scls_flow_edges <- 
   scls_flow_edges[scls_flow_edges$from_library != scls_flow_edges$to_library, ]
 
+find_county <- function(letter_code){
+  if(letter_code %in% c('ACL', 'ROM') ){
+    return('Adams')
+    } 
+  else if(letter_code %in% c('CIA', 'COL', 'LDI', 'PAR', 'POR', 'POY', 'RAN', 'RIO', 'WID', 'WYO') ){
+    return('Columbia')
+    } 
+  else if(letter_code %in% c('BLV', 'BER', 'CBR', 'CSP', 'DCL', 'MRS', 'DEE', 'DFT', 'FCH', 'MAR', 'MAZ', 'MCF', 'MID', 'MOO', 'MTH', 'ORE', 'STO', 'SUN', 'VER', 'WAU') ){
+    return('Dane')
+    } 
+  else if(letter_code %in% c('MAD', 'HPB', 'HAW', 'LAK', 'MEA', 'MSB', 'PIN', 'SEQ', 'SMB') ){
+    return('Madison PL')
+    }
+  else if(letter_code %in% c('ALB', 'BRD', 'MRO', 'MNT', 'NGL') ){
+    return('Green')
+    }
+  else if(letter_code %in% c('AMH', 'ALM', 'PLO', 'ROS', 'STP') ){
+    return('Portage')
+    }
+  else if(letter_code %in% c('BAR', 'LAV', 'NOF', 'PLA', 'PDS', 'REE', 'RKS', 'SKC', 'SGR') ){ 
+    return('Sauk')
+    }
+  else if(letter_code %in% c('ARP', 'MFD', 'NEK', 'PIT', 'VES', 'MCM') ){
+    return('Wood')
+    }
+  else {
+    return('other')
+    }
+}
 
-sector_codes <- unique( c(scls_flow_edges$from_library, scls_flow_edges$to_library ) )
-
-sector_codes_df <- 
-  as.data.frame(sector_codes) %>% 
-  mutate(
-    county = case_when (
-      sector_codes %in% c('ACL', 'ROM') ~ 'Adams',
-      sector_codes %in% c('CIA', 'COL', 'LDI', 'PAR', 'POR', 'POY', 'RAN', 'RIO', 'WID', 'WYO') ~ 'Columbia',
-      sector_codes %in% c('BLV', 'BER', 'CBR', 'CSP', 'DCL', 'MRS', 'DEE', 'DFT', 'FCH', 'MAR', 'MAZ', 'MCF', 'MID', 'MOO', 'MTH', 'ORE', 'STO', 'SUN', 'VER', 'WAU') ~ 'Dane',
-      sector_codes %in% c('MAD', 'HPB', 'HAW', 'LAK', 'MEA', 'MSB', 'PIN', 'SEQ', 'SMB') ~ 'Madison PL',
-      sector_codes %in% c('ALB', 'BRD', 'MRO', 'MNT', 'NGL') ~ 'Green',
-      sector_codes %in% c('AMH', 'ALM', 'PLO', 'ROS', 'STP') ~ 'Portage',
-      sector_codes %in% c('BAR', 'LAV', 'NOF', 'PLA', 'PDS', 'REE', 'RKS', 'SKC', 'SGR') ~ 'Sauk',
-      sector_codes %in% c('ARP', 'MFD', 'NEK', 'PIT', 'VES', 'MCM') ~ 'Wood',
-      TRUE ~ 'other'
-    )
-  )
-
-county_grouping <- 
-  structure(
-    sector_codes_df$county, 
-    names = sector_codes_df$sector_codes
-    )
-
+###
 scls_flow_edges_avg20 <- scls_flow_edges[scls_flow_edges$daily_average>=20.0, ]
 
+sector_codes <- unique( 
+  c(scls_flow_edges_avg20$from_library, scls_flow_edges_avg20$to_library)
+  )
 
+sector_counties <- sapply(sector_codes, find_county)
 
+county_grouping <-
+  structure(
+    sector_counties,
+    names = sector_codes
+    )
 
+###
 par(bg='gray85')
 
 circos.par(
@@ -74,7 +91,6 @@ chordDiagram(
   annotationTrack = c('grid'),
   annotationTrackHeight = 0.05,
   #preAllocateTracks = list(track.height = max( strwidth( sector_codes_df$sector_codes) ) ), 
-  #preAllocateTracks = 1,
   preAllocateTracks = list(list(track.height = mm_h(5) ), list(track.height = mm_h(10)) ),
   directional = T, 
   direction.type = c("diffHeight", "arrows"),
@@ -82,25 +98,22 @@ chordDiagram(
   link.sort = TRUE,
   link.decreasing = TRUE,
   group = county_grouping
-  
   )
 
-
-
-circos.track(track.index = 2, panel.fun = function(x, y) {
-  circos.text(
-    CELL_META$xcenter, 
-    CELL_META$ylim[1], 
-    CELL_META$sector.index, 
-    facing = 'clockwise', 
-    niceFacing = T, adj = c(0, 0.5),
-    #family = 'Helvetica'
-    )
-  }, bg.border = NA
+circos.track(
+  track.index = 2, panel.fun = function(x, y) {
+    circos.text(
+      CELL_META$xcenter, 
+      CELL_META$ylim[1], 
+      CELL_META$sector.index, 
+      facing = 'clockwise', 
+      niceFacing = T, adj = c(0, 0.5)
+      )
+    }, bg.border = NA
   )
 
 highlight.sector(
-  c('DFT', 'FCH', 'MCF', 'MID', 'MOO', 'MTH', 'ORE', 'STO', 'SUN', 'VER', 'WAU'),
+  names(which(county_grouping=='Dane')),
   track.index = 1,
   col = "#F6AE2D",
   text = 'DANE COUNTY',
@@ -110,7 +123,7 @@ highlight.sector(
 )
 
 highlight.sector(
-  c('HAW', 'HPB', 'LAK', 'MAD', 'MEA', 'MSB', 'PIN', 'SEQ', 'SMB'),
+  names(which(county_grouping=='Madison PL')),
   track.index = 1,
   col = "#005A9C",
   text = 'MADISON PL',
@@ -120,35 +133,26 @@ highlight.sector(
 )
 
 highlight.sector(
-  c('STP', 'MCM'),
+  names(which(county_grouping!='Dane' & county_grouping!='Madison PL')),
   track.index = 1,
-  col = "#b3b7b8",
+  col = "#3C3B3B",
   text = 'OTHER',
-  text.col = '#000000',
+  text.col = '#FFFFFF',
   facing = 'bending.inside',
   niceFacing = T
 )
 
-
 circos.info()
-circos.clear()
 
 
 
-for(si in get.all.sector.index()){
-  circos.axis(
-    h = "bottom",
-    sector.index = si,
-    track.index = 1,
-    labels = F,
-    major.tick = F
-  )
-}
 
 
 
-# TODO: change sector/link colors
-# TODO: label county groupings
+
+
+# DONE: change sector/link colors
+# DONE: label county groupings
 # TODO: change order of sectors w/in groups
 # TODO: orient labels w/ spacing; horizontal/vertical?
 # TODO: add plot title, caption
@@ -157,19 +161,7 @@ for(si in get.all.sector.index()){
 
 
 ############################################################################
-# install.packages("extrafont")
-library(extrafont)
 
-# Auto detect the available fonts in your computer
-# This can take several minutes to run
-font_import()
-
-# Font family names
-fonts()
-
-# Data frame containing the font family names
-fonttable()
-############################################################################
 
 # scls_flow_edges <- 
 #   scls_flow_edges %>% 
@@ -196,6 +188,33 @@ fonttable()
 #   group = county_grouping
 #   )
 
+
+
+# for(si in get.all.sector.index()){
+#   circos.axis(
+#     h = "bottom",
+#     sector.index = si,
+#     track.index = 1,
+#     labels = F,
+#     major.tick = F
+#   )
+# }
+
+# sector_codes_df <- 
+#   as.data.frame(sector_codes) %>% 
+#   mutate(
+#     county = case_when (
+#       sector_codes %in% c('ACL', 'ROM') ~ 'Adams',
+#       sector_codes %in% c('CIA', 'COL', 'LDI', 'PAR', 'POR', 'POY', 'RAN', 'RIO', 'WID', 'WYO') ~ 'Columbia',
+#       sector_codes %in% c('BLV', 'BER', 'CBR', 'CSP', 'DCL', 'MRS', 'DEE', 'DFT', 'FCH', 'MAR', 'MAZ', 'MCF', 'MID', 'MOO', 'MTH', 'ORE', 'STO', 'SUN', 'VER', 'WAU') ~ 'Dane',
+#       sector_codes %in% c('MAD', 'HPB', 'HAW', 'LAK', 'MEA', 'MSB', 'PIN', 'SEQ', 'SMB') ~ 'Madison PL',
+#       sector_codes %in% c('ALB', 'BRD', 'MRO', 'MNT', 'NGL') ~ 'Green',
+#       sector_codes %in% c('AMH', 'ALM', 'PLO', 'ROS', 'STP') ~ 'Portage',
+#       sector_codes %in% c('BAR', 'LAV', 'NOF', 'PLA', 'PDS', 'REE', 'RKS', 'SKC', 'SGR') ~ 'Sauk',
+#       sector_codes %in% c('ARP', 'MFD', 'NEK', 'PIT', 'VES', 'MCM') ~ 'Wood',
+#       TRUE ~ 'other'
+#     )
+#   )
 ############################################################################
 
 library(statnet)
