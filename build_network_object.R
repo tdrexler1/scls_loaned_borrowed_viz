@@ -151,9 +151,9 @@ circos.info()
 
 
 
-# DONE: change sector/link colors
+# DONE-ISH: change sector/link colors - ? automatic selection ?
 # DONE: label county groupings
-# TODO: change order of sectors w/in groups
+# TODO: change order of sectors w/in groups - ? dplyr sort from_lib by sum of counts ?
 # TODO: orient labels w/ spacing; horizontal/vertical?
 # TODO: add plot title, caption
 # TODO: add interactivity with Shiny? tootips on hover would be really helpful
