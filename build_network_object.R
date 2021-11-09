@@ -91,7 +91,7 @@ chordDiagram(
   annotationTrack = c('grid'),
   annotationTrackHeight = 0.05,
   #preAllocateTracks = list(track.height = max( strwidth( sector_codes_df$sector_codes) ) ), 
-  preAllocateTracks = list(list(track.height = mm_h(5) ), list(track.height = mm_h(10)) ),
+  preAllocateTracks = list(list(track.height = mm_h(6) ), list(track.height = mm_h(10)) ),
   directional = T, 
   direction.type = c("diffHeight", "arrows"),
   link.arr.type = "big.arrow",
