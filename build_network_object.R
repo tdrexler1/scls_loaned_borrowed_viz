@@ -40,16 +40,49 @@ find_county <- function(letter_code){
 ###
 scls_flow_edges_avg20 <- scls_flow_edges[scls_flow_edges$daily_average>=20.0, ]
 
-sector_codes <- unique( 
-  c(scls_flow_edges_avg20$from_library, scls_flow_edges_avg20$to_library)
+# sector_codes <- unique( 
+#   c(scls_flow_edges_avg20$from_library, scls_flow_edges_avg20$to_library)
+#   )
+# 
+# unq_senders <- unique(scls_flow_edges_avg20$from_library)
+# unq_rcvrs <- unique(scls_flow_edges_avg20$to_library)
+# 
+# rcvrs_only <- unq_rcvrs[which(!(unq_rcvrs %in% unq_senders))]
+# 
+# rcvrs_only_df <-
+#   cbind.data.frame(
+#     rcvrs_only,
+#     rep("-", length(rcvrs_only)),
+#     rep(0, length(rcvrs_only)),
+#     rep(0, length(rcvrs_only))
+#   )
+# 
+# colnames(rcvrs_only_df) <- colnames(scls_flow_edges_avg20)
+
+rcvrs_df <- 
+  cbind.data.frame(
+    scls_flow_edges_avg20$to_library,
+    rep("-", length(scls_flow_edges_avg20$to_library)),
+    scls_flow_edges_avg20$count,
+    rep(0, length(scls_flow_edges_avg20$to_library))
   )
 
-sector_counties <- sapply(sector_codes, find_county)
+colnames(rcvrs_df) <- colnames(scls_flow_edges_avg20)
+
+scls_flow_edges_grouped <- 
+  scls_flow_edges_avg20 %>% 
+  bind_rows(rcvrs_df) %>% 
+  group_by(from_library) %>% 
+  summarise(total_count = sum(count)) %>% 
+  mutate(county = sapply(from_library, find_county)) %>% 
+  arrange(county, desc(total_count) )
+
+#sector_counties <- sapply(sector_codes, find_county)
 
 county_grouping <-
   structure(
-    sector_counties,
-    names = sector_codes
+    scls_flow_edges_grouped$county,
+    names = scls_flow_edges_grouped$from_library
     )
 
 ###
@@ -59,29 +92,39 @@ circos.par(
   track.margin = c(0.01, 0.01)
   )
 
-sector_colors = c(
-  WAU = "#8175AA", 
-  VER = "#638B66", 
-  SUN = "#E07972", 
-  STO = "#DB9E68", 
-  ORE = "#4F6980", 
-  MTH = "#BB3E03", 
-  MOO = "#7A306C", 
-  MID = "#659E2A", 
-  MCF = "#9E2A2B", 
-  FCH = "#E09F3E",
-  DFT = "#0F4C81",
-  HAW = "#F47942",
-  HPB = "#849DB1",
-  LAK = "#BFBB60",
-  MAD = "#C23D49",
-  MEA = "#005500",
-  MSB = "#3F1CC3",
-  PIN = "#F45909",
-  SEQ = "#030A8C",
-  SMB = "#FCC30B",
-  STP = "#DC3080",
-  MCM = "#743023")
+sector_colors = 
+  structure( 
+    c("#0F4C81", "#E09F3E", "#9E2A2B", "#659E2A", "#7A306C", "#BB3E03", "#4F6980",
+      "#DB9E68", "#E07972", "#638B66", "#8175AA", "#F47942", "#849DB1", "#BFBB60",
+      "#C23D49", "#005500", "#3F1CC3", "#F45909", "#030A8C", "#FCC30B", "#DC3080",
+      "#743023"
+      ),
+    names = scls_flow_edges_grouped$from_library
+    )
+
+# sector_colors = c(
+#   WAU = "#8175AA", 
+#   VER = "#638B66", 
+#   SUN = "#E07972", 
+#   STO = "#DB9E68", 
+#   ORE = "#4F6980", 
+#   MTH = "#BB3E03", 
+#   MOO = "#7A306C", 
+#   MID = "#659E2A", 
+#   MCF = "#9E2A2B", 
+#   FCH = "#E09F3E",
+#   DFT = "#0F4C81",
+#   HAW = "#F47942",
+#   HPB = "#849DB1",
+#   LAK = "#BFBB60",
+#   MAD = "#C23D49",
+#   MEA = "#005500",
+#   MSB = "#3F1CC3",
+#   PIN = "#F45909",
+#   SEQ = "#030A8C",
+#   SMB = "#FCC30B",
+#   STP = "#DC3080",
+#   MCM = "#743023")
 
 circos.clear()
 
@@ -90,14 +133,15 @@ chordDiagram(
   grid.col = sector_colors,
   annotationTrack = c('grid'),
   annotationTrackHeight = 0.05,
-  #preAllocateTracks = list(track.height = max( strwidth( sector_codes_df$sector_codes) ) ), 
+  #preAllocateTracks = list(track.height = max( strwidth( sector_codes_df$sector_codes) ) ),
   preAllocateTracks = list(list(track.height = mm_h(6) ), list(track.height = mm_h(10)) ),
-  directional = T, 
+  directional = T,
   direction.type = c("diffHeight", "arrows"),
   link.arr.type = "big.arrow",
   link.sort = TRUE,
   link.decreasing = TRUE,
-  group = county_grouping
+  group = county_grouping,
+  order = sort(scls_flow_edges_grouped$from_library, decreasing = T)
   )
 
 circos.track(
@@ -148,12 +192,13 @@ circos.info()
 
 
 
+get.all.sector.index()
 
 
-
-# DONE-ISH: change sector/link colors - ? automatic selection ?
+# DONE: change sector/link colors - automatic selection
 # DONE: label county groupings
-# TODO: change order of sectors w/in groups - ? dplyr sort from_lib by sum of counts ?
+# DONE: change order of sectors w/in groups - ? dplyr sort from_lib by sum of counts ?
+# TODO: change color sequence
 # TODO: orient labels w/ spacing; horizontal/vertical?
 # TODO: add plot title, caption
 # TODO: add interactivity with Shiny? tootips on hover would be really helpful
