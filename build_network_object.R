@@ -190,9 +190,12 @@ highlight.sector(
 
 
 
+
 circos.info()
 
 get.all.sector.index()
+
+
 
 
 # DONE: change sector/link colors - automatic selection
