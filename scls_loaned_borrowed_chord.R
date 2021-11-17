@@ -1,14 +1,12 @@
-# setup
+#' Setup -----------------------------------------
 
 library(circlize)
 library(dplyr)
 
 
-# function to assign counties to libraries
-# args: 3-letter library code (string)
-# returns: county name (string)
+#' function to get county label from library code
 
-find_county <- function(letter_code){
+get_county <- function(letter_code) {
   if(letter_code %in% c('ACL', 'ROM') ){
     return('Adams')
     } 
@@ -34,23 +32,22 @@ find_county <- function(letter_code){
     return('Wood')
     }
   else {
-    return('other')
+    'other'
     }
 }
 
-## data setup
+#' Load & Format Data ----------------------------------
 
-# import data
 scls_flow_edges <- read.csv("loaned_borrowed_data.csv")
 
-# filter out loops (sender = receiver)
+#' filter out network loops (sender = receiver)
 scls_flow_edges <- 
   scls_flow_edges[scls_flow_edges$from_library != scls_flow_edges$to_library, ]
 
-# filter edges with daily averages above 20 items
+#' select network edges with daily item averages above
 scls_flow_edges_avg20 <- scls_flow_edges[scls_flow_edges$daily_average>=20.0, ]
 
-# create second dataframe w/ receivers listed as senders
+#' 2nd data frame w/ receivers listed as senders
 rcvrs_df <- 
   cbind.data.frame(
     scls_flow_edges_avg20$to_library,
@@ -59,28 +56,29 @@ rcvrs_df <-
     rep(0, length(scls_flow_edges_avg20$to_library))
   )
 
-# add column names to match first dataframe
+#' add matching column names
 colnames(rcvrs_df) <- colnames(scls_flow_edges_avg20)
 
-# combine rows from both dataframes, group by senders, sort by total item count
+#' combine data frames, group by senders, sort by county & total item count
 scls_flow_edges_grouped <- 
   scls_flow_edges_avg20 %>% 
   bind_rows(rcvrs_df) %>% 
   group_by(from_library) %>% 
   summarise(total_count = sum(count)) %>% 
-  mutate(county = sapply(from_library, find_county)) %>% 
+  mutate(county = sapply(from_library, get_county)) %>% 
   arrange(county, desc(total_count) )
 
-#sector_counties <- sapply(sector_codes, find_county)
+#sector_counties <- sapply(sector_codes, get_county)
 
-
+#' 
 county_grouping <-
   structure(
     scls_flow_edges_grouped$county,
     names = scls_flow_edges_grouped$from_library
     )
 
-###
+#' Plot Chord Diagram ----------------------------------
+
 par(bg='gray85')
 
 circos.par(
