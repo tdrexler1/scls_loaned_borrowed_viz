@@ -3,6 +3,8 @@
 library(circlize)
 library(dplyr)
 
+#' https://jokergoo.github.io/circlize_book/book/
+#' http://jokergoo.github.io/circlize/reference/index.html
 
 #'  get_county function ----------------------------------------------------
 #' return county label from library code
@@ -10,28 +12,41 @@ library(dplyr)
 get_county <- function(letter_code) {
   if(letter_code %in% c('ACL', 'ROM') ){
     return('Adams')
-    } 
-  else if(letter_code %in% c('CIA', 'COL', 'LDI', 'PAR', 'POR', 'POY', 'RAN', 'RIO', 'WID', 'WYO') ){
+  }
+  
+  else if(letter_code %in% c('CIA', 'COL', 'LDI', 'PAR', 'POR', 'POY', 'RAN', 
+                             'RIO', 'WID', 'WYO') ){
     return('Columbia')
-    } 
-  else if(letter_code %in% c('BLV', 'BER', 'CBR', 'CSP', 'DCL', 'MRS', 'DEE', 'DFT', 'FCH', 'MAR', 'MAZ', 'MCF', 'MID', 'MOO', 'MTH', 'ORE', 'STO', 'SUN', 'VER', 'WAU') ){
+  }
+  
+  else if(letter_code %in% c('BLV', 'BER', 'CBR', 'CSP', 'DCL', 'MRS', 'DEE', 
+                             'DFT', 'FCH', 'MAR', 'MAZ', 'MCF', 'MID', 'MOO', 
+                             'MTH', 'ORE', 'STO', 'SUN', 'VER', 'WAU') ){
     return('Dane')
-    } 
-  else if(letter_code %in% c('MAD', 'HPB', 'HAW', 'LAK', 'MEA', 'MSB', 'PIN', 'SEQ', 'SMB') ){
+  }
+  
+  else if(letter_code %in% c('MAD', 'HPB', 'HAW', 'LAK', 'MEA', 'MSB', 'PIN', 
+                             'SEQ', 'SMB') ){
     return('Madison PL')
-    }
+  }
+  
   else if(letter_code %in% c('ALB', 'BRD', 'MRO', 'MNT', 'NGL') ){
     return('Green')
-    }
+  }
+  
   else if(letter_code %in% c('AMH', 'ALM', 'PLO', 'ROS', 'STP') ){
     return('Portage')
-    }
-  else if(letter_code %in% c('BAR', 'LAV', 'NOF', 'PLA', 'PDS', 'REE', 'RKS', 'SKC', 'SGR') ){ 
+  }
+  
+  else if(letter_code %in% c('BAR', 'LAV', 'NOF', 'PLA', 'PDS', 'REE', 'RKS', 
+                             'SKC', 'SGR') ){ 
     return('Sauk')
-    }
+  }
+  
   else if(letter_code %in% c('ARP', 'MFD', 'NEK', 'PIT', 'VES', 'MCM') ){
     return('Wood')
-    }
+  }
+  
   else {
     'other'
     }
@@ -49,7 +64,7 @@ scls_flow_edges <-
 #' select network edges with daily item averages above
 scls_flow_edges_avg20 <- scls_flow_edges[scls_flow_edges$daily_average>=20.0, ]
 
-#' 2nd data frame w/ receivers listed as senders
+#' data frame w/ receivers listed as senders
 rcvrs_df <- 
   cbind.data.frame(
     scls_flow_edges_avg20$to_library,
@@ -70,9 +85,7 @@ scls_flow_edges_grouped <-
   mutate(county = sapply(from_library, get_county)) %>% 
   arrange(county, desc(total_count) )
 
-#sector_counties <- sapply(sector_codes, get_county)
-
-#' 
+#' county labels for sending libraries after grouping
 county_grouping <-
   structure(
     scls_flow_edges_grouped$county,
@@ -82,11 +95,8 @@ county_grouping <-
 
 #' Plot Chord Diagram ------------------------------------------------------
 
+#' setup
 par(bg='gray85', mar=c(0, 0, 3, 0), oma=c(0, 0, 2, 0))
-
-circos.par(
-  track.margin = c(0.01, 0.01)
-  )
 
 sector_colors = 
   structure( 
@@ -94,18 +104,27 @@ sector_colors =
       "#DB9E68", "#E07972", "#638B66", "#8175AA", "#F47942", "#849DB1", "#BFBB60",
       "#C23D49", "#005500", "#3F1CC3", "#F45909", "#030A8C", "#FCC30B", "#DC3080",
       "#743023"
-      ),
+    ),
     names = scls_flow_edges_grouped$from_library
-    )
+  )
 
+#' chord diagram set up
 circos.clear()
 
+circos.par(
+  track.margin = c(0.01, 0.01)
+  )
+
+#' draw chord diagram, group libraries by county
 chordDiagram(
   scls_flow_edges_avg20[ , c(1,2,4)],
   grid.col = sector_colors,
   annotationTrack = c('grid'),
   annotationTrackHeight = 0.05,
-  preAllocateTracks = list(list(track.height = mm_h(6) ), list(track.height = mm_h(10)) ),
+  preAllocateTracks = list(
+    list(track.height = mm_h(6)), 
+    list(track.height = mm_h(10)) 
+    ),
   directional = T,
   direction.type = c("diffHeight", "arrows"),
   link.arr.type = "big.arrow",
@@ -115,6 +134,7 @@ chordDiagram(
   order = sort(scls_flow_edges_grouped$from_library, decreasing = T)
   )
 
+#' sector text labels (3-letter codes)
 circos.track(
   track.index = 2, panel.fun = function(x, y) {
     circos.text(
@@ -127,6 +147,7 @@ circos.track(
     }, bg.border = NA
   )
 
+#' outer sectors with county labels -------------------------
 highlight.sector(
   names(which(county_grouping=='Dane')),
   track.index = 1,
@@ -157,13 +178,17 @@ highlight.sector(
   niceFacing = T
 )
 
+#' plot title & subtitle
 #' https://stackoverflow.com/a/55059687
 #' https://www.r-graph-gallery.com/74-margin-and-oma-cheatsheet.html
+
 mtext(
-  "Daily Average Items Loaned", side=3, line=1, at=-1, adj=0, cex=1.5, font=2
+  "Daily Average Items Loaned", 
+  side=3, line=1, at=-1, adj=0, cex=1.5, font=2
   )
 mtext(
-  "Libraries lending more than 20 items/day", side=3, line=0, at=-1, adj=0, cex=1
+  "Libraries lending more than 20 items/day", 
+  side=3, line=0, at=-1, adj=0, cex=1
 )
 
 
