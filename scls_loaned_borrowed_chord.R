@@ -6,7 +6,7 @@ library(dplyr)
 #' https://jokergoo.github.io/circlize_book/book/
 #' http://jokergoo.github.io/circlize/reference/index.html
 
-#'  get_county function ----------------------------------------------------
+#' Function: get_county  ---------------------------------------------------
 #' return county label from library code
 
 get_county <- function(letter_code) {
