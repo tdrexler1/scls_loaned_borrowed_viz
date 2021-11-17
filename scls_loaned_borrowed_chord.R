@@ -96,7 +96,7 @@ county_grouping <-
 #' Plot Chord Diagram ------------------------------------------------------
 
 #' setup
-par(bg='gray85', mar=c(0, 0, 3, 0), oma=c(0, 0, 2, 0))
+par(bg='gray90', mar=c(0, 0, 0, 0), oma=c(0, 0, 2, 0))
 
 sector_colors = 
   structure( 
@@ -122,7 +122,7 @@ chordDiagram(
   annotationTrack = c('grid'),
   annotationTrackHeight = 0.05,
   preAllocateTracks = list(
-    list(track.height = mm_h(6)), 
+    list(track.height = mm_h(5)), 
     list(track.height = mm_h(10)) 
     ),
   directional = T,
@@ -154,8 +154,11 @@ highlight.sector(
   col = "#F6AE2D",
   text = 'DANE COUNTY',
   text.col = '#000000',
-  facing = 'bending.outside',
-  niceFacing = T
+  cex = 0.8,
+  facing = 'bending.inside',
+  niceFacing = T,
+  text.vjust = 0.3,
+  font = 2
 )
 
 highlight.sector(
@@ -164,8 +167,11 @@ highlight.sector(
   col = "#005A9C",
   text = 'MADISON PL',
   text.col = '#CCCCCC',
+  cex = 0.8,
   facing = 'bending.inside',
-  niceFacing = T
+  niceFacing = T,
+  text.vjust = 0.3,
+  font = 2
 )
 
 highlight.sector(
@@ -174,8 +180,11 @@ highlight.sector(
   col = "#3C3B3B",
   text = 'OTHER',
   text.col = '#FFFFFF',
+  cex = 0.8,
   facing = 'bending.inside',
-  niceFacing = T
+  niceFacing = T,
+  text.vjust = 0.3,
+  font = 2
 )
 
 #' plot title & subtitle
