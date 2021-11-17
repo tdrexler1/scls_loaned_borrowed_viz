@@ -79,7 +79,7 @@ county_grouping <-
 
 #' Plot Chord Diagram ----------------------------------
 
-par(bg='gray85')
+par(bg='gray85', mar=c(0, 0, 3, 0), oma=c(0, 0, 2, 0))
 
 circos.par(
   track.margin = c(0.01, 0.01)
@@ -154,9 +154,17 @@ highlight.sector(
   niceFacing = T
 )
 
-circos.info()
 
-get.all.sector.index()
+mtext(
+  "Daily Average Items Loaned", side=3, line=1, at=-1, adj=0, cex=1.5, font=2
+  )
+mtext(
+  "Libraries lending more than 20 items/day", side=3, line=0, at=-1, adj=0, cex=1
+)
+
+#circos.info()
+
+#get.all.sector.index()
 
 
 # DONE: change sector/link colors - automatic selection
@@ -164,5 +172,5 @@ get.all.sector.index()
 # DONE: change order of sectors w/in groups - ? dplyr sort from_lib by sum of counts ?
 # DONE: change color sequence
 # TODO: orient labels w/ spacing; horizontal/vertical?
-# TODO: add plot title, caption
+# DONE: add plot title, subtitle (no caption?)
 # TODO: add interactivity with Shiny? tootips on hover would be really helpful
