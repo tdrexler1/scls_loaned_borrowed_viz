@@ -1,0 +1,170 @@
+# setup
+
+library(circlize)
+library(dplyr)
+
+
+# function to assign counties to libraries
+# args: 3-letter library code (string)
+# returns: county name (string)
+
+find_county <- function(letter_code){
+  if(letter_code %in% c('ACL', 'ROM') ){
+    return('Adams')
+    } 
+  else if(letter_code %in% c('CIA', 'COL', 'LDI', 'PAR', 'POR', 'POY', 'RAN', 'RIO', 'WID', 'WYO') ){
+    return('Columbia')
+    } 
+  else if(letter_code %in% c('BLV', 'BER', 'CBR', 'CSP', 'DCL', 'MRS', 'DEE', 'DFT', 'FCH', 'MAR', 'MAZ', 'MCF', 'MID', 'MOO', 'MTH', 'ORE', 'STO', 'SUN', 'VER', 'WAU') ){
+    return('Dane')
+    } 
+  else if(letter_code %in% c('MAD', 'HPB', 'HAW', 'LAK', 'MEA', 'MSB', 'PIN', 'SEQ', 'SMB') ){
+    return('Madison PL')
+    }
+  else if(letter_code %in% c('ALB', 'BRD', 'MRO', 'MNT', 'NGL') ){
+    return('Green')
+    }
+  else if(letter_code %in% c('AMH', 'ALM', 'PLO', 'ROS', 'STP') ){
+    return('Portage')
+    }
+  else if(letter_code %in% c('BAR', 'LAV', 'NOF', 'PLA', 'PDS', 'REE', 'RKS', 'SKC', 'SGR') ){ 
+    return('Sauk')
+    }
+  else if(letter_code %in% c('ARP', 'MFD', 'NEK', 'PIT', 'VES', 'MCM') ){
+    return('Wood')
+    }
+  else {
+    return('other')
+    }
+}
+
+## data setup
+
+# import data
+scls_flow_edges <- read.csv("loaned_borrowed_data.csv")
+
+# filter out loops (sender = receiver)
+scls_flow_edges <- 
+  scls_flow_edges[scls_flow_edges$from_library != scls_flow_edges$to_library, ]
+
+# filter edges with daily averages above 20 items
+scls_flow_edges_avg20 <- scls_flow_edges[scls_flow_edges$daily_average>=20.0, ]
+
+# create second dataframe w/ receivers listed as senders
+rcvrs_df <- 
+  cbind.data.frame(
+    scls_flow_edges_avg20$to_library,
+    rep("-", length(scls_flow_edges_avg20$to_library)),
+    scls_flow_edges_avg20$count,
+    rep(0, length(scls_flow_edges_avg20$to_library))
+  )
+
+# add column names to match first dataframe
+colnames(rcvrs_df) <- colnames(scls_flow_edges_avg20)
+
+# combine rows from both dataframes, group by senders, sort by total item count
+scls_flow_edges_grouped <- 
+  scls_flow_edges_avg20 %>% 
+  bind_rows(rcvrs_df) %>% 
+  group_by(from_library) %>% 
+  summarise(total_count = sum(count)) %>% 
+  mutate(county = sapply(from_library, find_county)) %>% 
+  arrange(county, desc(total_count) )
+
+#sector_counties <- sapply(sector_codes, find_county)
+
+
+county_grouping <-
+  structure(
+    scls_flow_edges_grouped$county,
+    names = scls_flow_edges_grouped$from_library
+    )
+
+###
+par(bg='gray85')
+
+circos.par(
+  track.margin = c(0.01, 0.01)
+  )
+
+sector_colors = 
+  structure( 
+    c("#0F4C81", "#E09F3E", "#9E2A2B", "#659E2A", "#7A306C", "#BB3E03", "#4F6980",
+      "#DB9E68", "#E07972", "#638B66", "#8175AA", "#F47942", "#849DB1", "#BFBB60",
+      "#C23D49", "#005500", "#3F1CC3", "#F45909", "#030A8C", "#FCC30B", "#DC3080",
+      "#743023"
+      ),
+    names = scls_flow_edges_grouped$from_library
+    )
+
+circos.clear()
+
+chordDiagram(
+  scls_flow_edges_avg20[ , c(1,2,4)],
+  grid.col = sector_colors,
+  annotationTrack = c('grid'),
+  annotationTrackHeight = 0.05,
+  preAllocateTracks = list(list(track.height = mm_h(6) ), list(track.height = mm_h(10)) ),
+  directional = T,
+  direction.type = c("diffHeight", "arrows"),
+  link.arr.type = "big.arrow",
+  link.sort = TRUE,
+  link.decreasing = TRUE,
+  group = county_grouping,
+  order = sort(scls_flow_edges_grouped$from_library, decreasing = T)
+  )
+
+circos.track(
+  track.index = 2, panel.fun = function(x, y) {
+    circos.text(
+      CELL_META$xcenter, 
+      CELL_META$ylim[1], 
+      CELL_META$sector.index, 
+      facing = 'clockwise', 
+      niceFacing = T, adj = c(0, 0.5)
+      )
+    }, bg.border = NA
+  )
+
+highlight.sector(
+  names(which(county_grouping=='Dane')),
+  track.index = 1,
+  col = "#F6AE2D",
+  text = 'DANE COUNTY',
+  text.col = '#000000',
+  facing = 'bending.outside',
+  niceFacing = T
+)
+
+highlight.sector(
+  names(which(county_grouping=='Madison PL')),
+  track.index = 1,
+  col = "#005A9C",
+  text = 'MADISON PL',
+  text.col = '#CCCCCC',
+  facing = 'bending.inside',
+  niceFacing = T
+)
+
+highlight.sector(
+  names(which(county_grouping!='Dane' & county_grouping!='Madison PL')),
+  track.index = 1,
+  col = "#3C3B3B",
+  text = 'OTHER',
+  text.col = '#FFFFFF',
+  facing = 'bending.inside',
+  niceFacing = T
+)
+
+circos.info()
+
+get.all.sector.index()
+
+
+# DONE: change sector/link colors - automatic selection
+# DONE: label county groupings
+# DONE: change order of sectors w/in groups - ? dplyr sort from_lib by sum of counts ?
+# DONE: change color sequence
+# TODO: orient labels w/ spacing; horizontal/vertical?
+# TODO: add plot title, caption
+# TODO: add interactivity with Shiny? tootips on hover would be really helpful

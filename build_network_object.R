@@ -198,7 +198,7 @@ get.all.sector.index()
 # DONE: change sector/link colors - automatic selection
 # DONE: label county groupings
 # DONE: change order of sectors w/in groups - ? dplyr sort from_lib by sum of counts ?
-# TODO: change color sequence
+# DONE: change color sequence
 # TODO: orient labels w/ spacing; horizontal/vertical?
 # TODO: add plot title, caption
 # TODO: add interactivity with Shiny? tootips on hover would be really helpful
