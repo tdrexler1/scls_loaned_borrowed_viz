@@ -1,10 +1,11 @@
-#' Setup -----------------------------------------
+#' Setup -------------------------------------------------------------------
 
 library(circlize)
 library(dplyr)
 
 
-#' function to get county label from library code
+#'  get_county function ----------------------------------------------------
+#' return county label from library code
 
 get_county <- function(letter_code) {
   if(letter_code %in% c('ACL', 'ROM') ){
@@ -36,7 +37,8 @@ get_county <- function(letter_code) {
     }
 }
 
-#' Load & Format Data ----------------------------------
+
+#' Load & Prepare Data -----------------------------------------------------
 
 scls_flow_edges <- read.csv("loaned_borrowed_data.csv")
 
@@ -77,7 +79,8 @@ county_grouping <-
     names = scls_flow_edges_grouped$from_library
     )
 
-#' Plot Chord Diagram ----------------------------------
+
+#' Plot Chord Diagram ------------------------------------------------------
 
 par(bg='gray85', mar=c(0, 0, 3, 0), oma=c(0, 0, 2, 0))
 
@@ -154,13 +157,17 @@ highlight.sector(
   niceFacing = T
 )
 
-
+#' https://stackoverflow.com/a/55059687
+#' https://www.r-graph-gallery.com/74-margin-and-oma-cheatsheet.html
 mtext(
   "Daily Average Items Loaned", side=3, line=1, at=-1, adj=0, cex=1.5, font=2
   )
 mtext(
   "Libraries lending more than 20 items/day", side=3, line=0, at=-1, adj=0, cex=1
 )
+
+
+#' Notes & Misc. -----------------------------------------------------------
 
 #circos.info()
 
