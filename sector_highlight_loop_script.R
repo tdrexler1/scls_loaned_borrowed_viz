@@ -17,10 +17,11 @@ highlight_groups <-
 
 for (sect in highlight_groups){
   print(sect)
-  highlight.sector(names(which(county_grouping==sect)),
+  highlight.sector(
+    names(which(county_grouping==sect)),
     track.index = 1,
     col = county_sector_formats[[sect]]$bg,
-    text = sect,
+    text = toupper(sect),
     text.col = county_sector_formats[[sect]]$txt,
     cex = 0.8,
     facing = 'bending.inside',

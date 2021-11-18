@@ -216,3 +216,4 @@ mtext(
 # TODO: orient labels w/ spacing; horizontal/vertical?
 # DONE: add plot title, subtitle (no caption?)
 # TODO: add interactivity with Shiny? tootips on hover would be really helpful
+# TODO: create highlight sectors automatically with loop?
