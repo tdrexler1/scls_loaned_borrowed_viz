@@ -6,11 +6,16 @@ county_sector_formats <- list(
 county_sector_formats
 unique(county_grouping)
 
+highlight_counties <- c("Dane", "Madison PL")
+other_lib <- names(county_grouping[which(!county_grouping %in% highlight_counties)])
+
+#other_group <- which((county_grouping!="Madison PL" & county_grouping!="Dane"))
+
 highlight_groups <- 
   unique(
     replace(
       county_grouping, 
-      which((county_grouping!="Madison PL" & county_grouping!="Dane")),
+      other_group,
       "Other"
       )
   )
