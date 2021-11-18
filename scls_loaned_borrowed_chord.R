@@ -148,6 +148,7 @@ circos.track(
   )
 
 #' outer sectors with county labels -------------------------
+
 highlight.sector(
   names(which(county_grouping=='Dane')),
   track.index = 1,
