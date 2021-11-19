@@ -6,22 +6,23 @@ county_sector_formats <- list(
 county_sector_formats
 unique(county_grouping)
 
-highlight_counties <- c("Dane", "Madison PL")
-other_lib <- names(county_grouping[which(!county_grouping %in% highlight_counties)])
+# highlight_counties <- c("Dane", "Madison PL")
+
+highlight_counties <- names(which(table(county_grouping) > 5))
+other_sect <- names(county_grouping[which(!county_grouping %in% highlight_counties)])
 
 #other_group <- which((county_grouping!="Madison PL" & county_grouping!="Dane"))
+# 
+# highlight_groups <- 
+#   unique(
+#     replace(
+#       county_grouping, 
+#       other_group,
+#       "Other"
+#       )
+#   )
 
-highlight_groups <- 
-  unique(
-    replace(
-      county_grouping, 
-      other_group,
-      "Other"
-      )
-  )
-
-for (sect in highlight_groups){
-  print(sect)
+for (sect in highlight_counties){
   highlight.sector(
     names(which(county_grouping==sect)),
     track.index = 1,
@@ -36,14 +37,29 @@ for (sect in highlight_groups){
   )
 }
 
-for (sect in unique(county_grouping)){
-  print(sect)
-  ifelse ((sect!="Dane" & sect!="Madison PL"),
-    print(county_sector_formats$Other$bg)
-  ,
-    print(county_sector_formats[[sect]]$bg)
-  )
-}
+highlight.sector(
+  other_sect,
+  track.index = 1,
+  col = county_sector_formats$Other$bg,
+  text = "OTHER",
+  text.col = county_sector_formats$Other$txt,
+  cex = 0.8,
+  facing = 'bending.inside',
+  niceFacing = T,
+  text.vjust = 0.3,
+  font = 2
+)
 
-county_sector_formats$Dane$bg
+
+# 
+# for (sect in unique(county_grouping)){
+#   print(sect)
+#   ifelse ((sect!="Dane" & sect!="Madison PL"),
+#     print(county_sector_formats$Other$bg)
+#   ,
+#     print(county_sector_formats[[sect]]$bg)
+#   )
+# }
+# 
+# county_sector_formats$Dane$bg
 
