@@ -1,13 +1,13 @@
-#' Setup -------------------------------------------------------------------
+# Setup ------------------------------------------------------------------------
 
 library(circlize)
 library(dplyr)
 
-#' https://jokergoo.github.io/circlize_book/book/
-#' http://jokergoo.github.io/circlize/reference/index.html
+# https://jokergoo.github.io/circlize_book/book/
+# http://jokergoo.github.io/circlize/reference/index.html
 
-#' Function: get_county  ---------------------------------------------------
-#' return county label from library code
+# Function: get_county  ---------------------------------------------------
+# return county label from library code
 
 get_county <- function(letter_code) {
   if(letter_code %in% c('ACL', 'ROM') ){
@@ -53,18 +53,18 @@ get_county <- function(letter_code) {
 }
 
 
-#' Load & Prepare Data -----------------------------------------------------
+# Load & Prepare Data ----------------------------------------------------------
 
 scls_flow_edges <- read.csv("loaned_borrowed_data.csv")
 
-#' filter out network loops (sender = receiver)
+# filter out network loops (sender == receiver)
 scls_flow_edges <- 
   scls_flow_edges[scls_flow_edges$from_library != scls_flow_edges$to_library, ]
 
-#' select network edges with daily item averages above
+# select network edges with daily item averages above
 scls_flow_edges_avg20 <- scls_flow_edges[scls_flow_edges$daily_average>=20.0, ]
 
-#' data frame w/ receivers listed as senders
+# data frame w/ receivers listed as senders
 rcvrs_df <- 
   cbind.data.frame(
     scls_flow_edges_avg20$to_library,
@@ -73,10 +73,10 @@ rcvrs_df <-
     rep(0, length(scls_flow_edges_avg20$to_library))
   )
 
-#' add matching column names
+# add matching column names
 colnames(rcvrs_df) <- colnames(scls_flow_edges_avg20)
 
-#' combine data frames, group by senders, sort by county & total item count
+# combine data frames, group by senders, sort by county & total item count
 scls_flow_edges_grouped <- 
   scls_flow_edges_avg20 %>% 
   bind_rows(rcvrs_df) %>% 
@@ -85,7 +85,7 @@ scls_flow_edges_grouped <-
   mutate(county = sapply(from_library, get_county)) %>% 
   arrange(county, desc(total_count) )
 
-#' county labels for sending libraries after grouping
+# county labels for sending libraries after grouping
 county_grouping <-
   structure(
     scls_flow_edges_grouped$county,
@@ -93,29 +93,46 @@ county_grouping <-
     )
 
 
-#' Plot Chord Diagram ------------------------------------------------------
+# Plot Formatting Setup --------------------------------------------------------
 
-#' setup
-par(bg='gray90', mar=c(0, 0, 0, 0), oma=c(0, 0, 2, 0))
-
+# color sequence for library sectors (22 colors)
+# sub-sequences run blue, yellow, red, green, purple, orange
 sector_colors = 
   structure( 
-    c("#0F4C81", "#E09F3E", "#9E2A2B", "#659E2A", "#7A306C", "#BB3E03", "#4F6980",
-      "#DB9E68", "#E07972", "#638B66", "#8175AA", "#F47942", "#849DB1", "#BFBB60",
-      "#C23D49", "#005500", "#3F1CC3", "#F45909", "#030A8C", "#FCC30B", "#DC3080",
-      "#743023"
+    c("#0F4C81", "#E09F3E", "#9E2A2B", "#659E2A", "#7A306C", "#BB3E03", 
+      "#4F6980", "#DB9E68", "#E07972", "#638B66", "#8175AA", "#F47942", 
+      "#849DB1", "#BFBB60", "#C23D49", "#005500", "#3F1CC3", "#F45909", 
+      "#030A8C", "#FCC30B", "#DC3080", "#743023"
     ),
     names = scls_flow_edges_grouped$from_library
   )
 
-#' chord diagram set up
+# formatting for county sectors
+county_sector_formats <- list(
+  Adams = c(list(bg="#000", txt="#000")),
+  Columbia = c(list(bg="#000", txt="#000")),
+  Dane = c(list(bg="#F6AE2D", txt="#000")),
+  Green = c(list(bg="#000", txt="#000")),
+  "Madison PL" = c(list(bg="#005A9C", txt="#FFFFFF")),
+  Portage = c(list(bg="#000", txt="#000")),
+  Sauk = c(list(bg="#000", txt="#000")),
+  Wood = c(list(bg="#000", txt="#000")),
+  Other = c(list(bg="#3C3B3B", txt="#FFFFFF"))
+)
+
+# Plot Chord Diagram -----------------------------------------------------------
+
+# setup
+par(bg='gray90', mar=c(0, 0, 0, 0), oma=c(0, 0, 2, 0))
+
+# chord diagram set up
 circos.clear()
 
 circos.par(
   track.margin = c(0.01, 0.01)
   )
 
-#' draw chord diagram, group libraries by county
+# draw chord diagram, group libraries by county
 chordDiagram(
   scls_flow_edges_avg20[ , c(1,2,4)],
   grid.col = sector_colors,
@@ -134,7 +151,7 @@ chordDiagram(
   order = sort(scls_flow_edges_grouped$from_library, decreasing = T)
   )
 
-#' sector text labels (3-letter codes)
+# sector text labels (3-letter codes)
 circos.track(
   track.index = 2, panel.fun = function(x, y) {
     circos.text(
@@ -147,14 +164,37 @@ circos.track(
     }, bg.border = NA
   )
 
-#' outer sectors with county labels -------------------------
+# Outer Sectors: County Names --------------------------------------------------
 
+# highlight counties with enough libraries to fit county name on outer sector
+highlight_counties <- names(which(table(county_grouping) > 5))
+
+# all other libraries
+other_sect <- names(county_grouping[which(!county_grouping %in% highlight_counties)])
+
+# county highlight sectors
+for (sect in highlight_counties){
+  highlight.sector(
+    names(which(county_grouping==sect)),
+    track.index = 1,
+    col = county_sector_formats[[sect]]$bg,
+    text = toupper(sect),
+    text.col = county_sector_formats[[sect]]$txt,
+    cex = 0.8,
+    facing = 'bending.inside',
+    niceFacing = T,
+    text.vjust = 0.3,
+    font = 2
+  )
+}
+
+# other library highlight sector
 highlight.sector(
-  names(which(county_grouping=='Dane')),
+  other_sect,
   track.index = 1,
-  col = "#F6AE2D",
-  text = 'DANE COUNTY',
-  text.col = '#000000',
+  col = county_sector_formats$Other$bg,
+  text = "OTHER",
+  text.col = county_sector_formats$Other$txt,
   cex = 0.8,
   facing = 'bending.inside',
   niceFacing = T,
@@ -162,36 +202,9 @@ highlight.sector(
   font = 2
 )
 
-highlight.sector(
-  names(which(county_grouping=='Madison PL')),
-  track.index = 1,
-  col = "#005A9C",
-  text = 'MADISON PL',
-  text.col = '#CCCCCC',
-  cex = 0.8,
-  facing = 'bending.inside',
-  niceFacing = T,
-  text.vjust = 0.3,
-  font = 2
-)
-
-highlight.sector(
-  names(which(county_grouping!='Dane' & county_grouping!='Madison PL')),
-  track.index = 1,
-  col = "#3C3B3B",
-  text = 'OTHER',
-  text.col = '#FFFFFF',
-  cex = 0.8,
-  facing = 'bending.inside',
-  niceFacing = T,
-  text.vjust = 0.3,
-  font = 2
-)
-
-#' plot title & subtitle
-#' https://stackoverflow.com/a/55059687
-#' https://www.r-graph-gallery.com/74-margin-and-oma-cheatsheet.html
-
+# plot title & subtitle
+# https://stackoverflow.com/a/55059687
+# https://www.r-graph-gallery.com/74-margin-and-oma-cheatsheet.html
 mtext(
   "Daily Average Items Loaned", 
   side=3, line=1, at=-1, adj=0, cex=1.5, font=2
@@ -213,7 +226,8 @@ mtext(
 # DONE: label county groupings
 # DONE: change order of sectors w/in groups - ? dplyr sort from_lib by sum of counts ?
 # DONE: change color sequence
-# TODO: orient labels w/ spacing; horizontal/vertical?
+# DONE: orient labels w/ spacing; horizontal/vertical?
 # DONE: add plot title, subtitle (no caption?)
-# TODO: add interactivity with Shiny? tootips on hover would be really helpful
-# TODO: create highlight sectors automatically with loop?
+# skip: add interactivity with Shiny? tootips on hover would be really helpful
+# DONE: create highlight sectors automatically with loop?
+# TODO: assign bg and txt colors to county sectors

@@ -63,3 +63,43 @@ highlight.sector(
 # 
 # county_sector_formats$Dane$bg
 
+# ORIGINAL CODE
+
+highlight.sector(
+  names(which(county_grouping=='Dane')),
+  track.index = 1,
+  col = "#F6AE2D",
+  text = 'DANE COUNTY',
+  text.col = '#000000',
+  cex = 0.8,
+  facing = 'bending.inside',
+  niceFacing = T,
+  text.vjust = 0.3,
+  font = 2
+)
+
+highlight.sector(
+  names(which(county_grouping=='Madison PL')),
+  track.index = 1,
+  col = "#005A9C",
+  text = 'MADISON PL',
+  text.col = '#CCCCCC',
+  cex = 0.8,
+  facing = 'bending.inside',
+  niceFacing = T,
+  text.vjust = 0.3,
+  font = 2
+)
+
+highlight.sector(
+  names(which(county_grouping!='Dane' & county_grouping!='Madison PL')),
+  track.index = 1,
+  col = "#3C3B3B",
+  text = 'OTHER',
+  text.col = '#FFFFFF',
+  cex = 0.8,
+  facing = 'bending.inside',
+  niceFacing = T,
+  text.vjust = 0.3,
+  font = 2
+)

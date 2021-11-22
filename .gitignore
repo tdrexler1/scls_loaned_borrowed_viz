@@ -4,3 +4,5 @@
 .Ruserdata
 *.Rproj
 loaned_borrowed_data/
+sector_highlight_loop_script.R
+build_network_object.R
