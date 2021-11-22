@@ -166,8 +166,25 @@ circos.track(
 
 # Outer Sectors: County Names --------------------------------------------------
 
+# calculate span of county grouping sectors in degrees
+county_spans <- 
+  sapply(unique(county_grouping), function(county){
+    max(sapply(names(which(county_grouping==county)), function(library){
+      if(get.cell.meta.data("cell.start.degree", library)!=0){
+        get.cell.meta.data("cell.start.degree", library)
+      }else{
+        360.0
+      }
+    })
+    )-min(sapply(names(which(county_grouping==county)), function(library){
+      get.cell.meta.data("cell.end.degree", library)
+    })
+    )
+  }
+)
+
 # highlight counties with enough libraries to fit county name on outer sector
-highlight_counties <- names(which(table(county_grouping) > 5))
+highlight_counties <- names(which(county_spans > 20))
 
 # all other libraries
 other_sect <- names(county_grouping[which(!county_grouping %in% highlight_counties)])
@@ -229,5 +246,5 @@ mtext(
 # DONE: orient labels w/ spacing; horizontal/vertical?
 # DONE: add plot title, subtitle (no caption?)
 # skip: add interactivity with Shiny? tootips on hover would be really helpful
-# DONE: create highlight sectors automatically with loop?
+# DONE: create highlight sectors automatically with loop? use "sapply" instead
 # TODO: assign bg and txt colors to county sectors
