@@ -165,6 +165,49 @@ circos.track(
   )
 
 # Outer Sectors: County Names --------------------------------------------------
+#sapply
+total_county_deg = c()
+
+for (county in unique(county_grouping)){
+  print(county)
+  county_libraries = c()
+  county_start_deg = c()
+  county_end_deg = c()
+  
+  #print(get.cell.meta.data("cell.end.degree", names(which(county_grouping==county))))
+  for (library in names(which(county_grouping==county))){
+    #print(get.cell.meta.data("cell.end.degree", library))
+    county_libraries <- c(county_libraries, library)
+    if(get.cell.meta.data("cell.start.degree", library)!=0){
+      county_start_deg <- c(county_start_deg, get.cell.meta.data("cell.start.degree", library))
+    }else{
+      county_start_deg <- c(county_start_deg, 360.0)
+    }
+    county_end_deg <- c(county_end_deg, get.cell.meta.data("cell.end.degree", library))
+  }
+  print(county_libraries)
+  print(county_start_deg)
+  print(county_end_deg)
+  
+  print(
+    paste(
+      "Start:", max(county_start_deg), 
+      " End:", min(county_end_deg),
+      " Size:", max(county_start_deg)-min(county_end_deg)
+      )
+    )
+  #print(min(county_start_deg))
+  total_county_deg <- c(total_county_deg, max(county_start_deg)-min(county_end_deg))
+}
+total_county_deg <- 
+  structure(
+    total_county_deg,
+    names=unique(county_grouping)
+  )
+
+total_county_deg
+highlight_counties <- names(which(total_county_deg > 20))
+highlight_counties
 
 # highlight counties with enough libraries to fit county name on outer sector
 highlight_counties <- names(which(table(county_grouping) > 5))
