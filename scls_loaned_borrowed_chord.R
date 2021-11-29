@@ -109,14 +109,14 @@ sector_colors =
 
 # formatting for county sectors
 county_sector_formats <- list(
-  Adams =        c(list(bg="#000000", txt="#000000")),
-  Columbia =     c(list(bg="#000000", txt="#000000")),
-  Dane =         c(list(bg="#F6AE2D", txt="#000000")),
-  Green =        c(list(bg="#000000", txt="#000000")),
-  "Madison PL" = c(list(bg="#005A9C", txt="#FFFFFF")),
-  Portage =      c(list(bg="#000000", txt="#000000")),
-  Sauk =         c(list(bg="#000000", txt="#000000")),
-  Wood =         c(list(bg="#000000", txt="#000000")),
+  Adams =        c(list(bg="#b6992d", txt="#FFFFFF")),
+  Columbia =     c(list(bg="#79706e", txt="#FFFFFF")),
+  Dane =         c(list(bg="#f28e28", txt="#FFFFFF")),
+  Green =        c(list(bg="#59a14f", txt="#FFFFFF")),
+  "Madison PL" = c(list(bg="#4e79a7", txt="#FFFFFF")),
+  Portage =      c(list(bg="#76448a", txt="#FFFFFF")),
+  Sauk =         c(list(bg="#e15759", txt="#FFFFFF")),
+  Wood =         c(list(bg="#499894", txt="#FFFFFF")),
   Other =        c(list(bg="#3C3B3B", txt="#FFFFFF"))
 )
 
